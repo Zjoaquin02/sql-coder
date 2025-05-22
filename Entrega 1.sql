@@ -132,7 +132,7 @@ GROUP BY
 ORDER BY
     fecha_turno;
 
-SELECT * FROM VistaAnalisisPorDia;medicos -- Muesta los analisis que se hicieron en cada dia
+SELECT * FROM VistaAnalisisPorDia; -- Muesta los analisis que se hicieron en cada dia
 
 CREATE VIEW VistaRecaudacionTotal AS
 SELECT
@@ -161,4 +161,52 @@ END $$
 DELIMITER ;
 
 SELECT * FROM LogEstadosRealizados ORDER BY fecha_registro DESC; -- Compara el estado anterior con el nuevo si es 2 guarda un log con id y fecha en el que se realizo el evento
+
+-- -------------Funcion----------------------- --
+DELIMITER $$
+
+CREATE FUNCTION contar_turnos_cliente(cliente_id INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE cantidad INT;
+    SELECT COUNT(*) INTO cantidad
+    FROM Turnos
+    WHERE id_cliente = cliente_id;
+    RETURN cantidad;
+END $$
+
+DELIMITER ;
+
+SELECT id_cliente, contar_turnos_cliente(id_cliente) AS cantidad_turnos FROM Clientes;
+
+-- ----------------Procedimiento almacenado----------------------- --
+DELIMITER $$
+
+CREATE PROCEDURE registrar_turno_simple (
+    IN p_id_cliente INT,
+    IN p_id_medico INT,
+    IN p_id_analisis INT,
+    IN p_fecha DATE,
+    IN p_hora TIME,
+    IN p_obs TEXT,
+    IN p_estado INT
+)
+BEGIN
+    INSERT INTO Turnos (
+        id_cliente, id_medico, id_analisis,
+        fecha_turno, hora_turno, observaciones, id_estado
+    ) VALUES (
+        p_id_cliente, p_id_medico, p_id_analisis,
+        p_fecha, p_hora, p_obs, p_estado
+    );
+END $$
+
+DELIMITER ;
+-- Ejemplo -- 
+CALL registrar_turno_simple(3, 2, 4, '2025-05-23', '12:00:00', 'Chequeo', 1);
+
+-- --------------------Usuario y permisos------------------------- --
+CREATE USER 'usuario_lectura'@'localhost' IDENTIFIED BY 'joaquin';
+GRANT SELECT ON prueba.* TO 'usuario_lectura'@'localhost';
 
