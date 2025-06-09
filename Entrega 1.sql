@@ -243,5 +243,3 @@ SELECT * FROM Turnos
 WHERE fecha_turno >= CURDATE()
 ORDER BY fecha_turno, hora_turno
 LIMIT 1;
-
-
