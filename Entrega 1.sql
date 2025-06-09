@@ -210,3 +210,38 @@ CALL registrar_turno_simple(3, 2, 4, '2025-05-23', '12:00:00', 'Chequeo', 1);
 CREATE USER 'usuario_lectura'@'localhost' IDENTIFIED BY 'joaquin';
 GRANT SELECT ON prueba.* TO 'usuario_lectura'@'localhost';
 
+-- --------------------Entrega final------------------------- --
+-- Vista con los analisis mas solicitados --
+CREATE VIEW VistaTopAnalisis AS
+SELECT
+    ta.nombre_analisis,
+    COUNT(*) AS cantidad_solicitudes
+FROM Turnos t
+JOIN TiposAnalisis ta ON t.id_analisis = ta.id_analisis
+GROUP BY ta.id_analisis
+ORDER BY cantidad_solicitudes DESC;
+
+-- Vista de medico con mas turnos asignados --
+CREATE VIEW VistaTopMedico AS
+SELECT
+    CONCAT(m.nombre, ' ', m.apellido) AS medico,
+    COUNT(*) AS cantidad_turnos
+FROM Turnos t
+JOIN Medicos m ON t.id_medico = m.id_medico
+GROUP BY m.id_medico
+ORDER BY cantidad_turnos DESC
+LIMIT 1;
+
+-- Turnos programados en el dia --
+CREATE VIEW VistaTurnosHoy AS
+SELECT * FROM Turnos
+WHERE fecha_turno = CURDATE();
+
+-- Proximo turno --
+CREATE VIEW VistaProximoTurno AS
+SELECT * FROM Turnos
+WHERE fecha_turno >= CURDATE()
+ORDER BY fecha_turno, hora_turno
+LIMIT 1;
+
+
